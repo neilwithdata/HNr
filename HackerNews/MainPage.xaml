@@ -1,0 +1,136 @@
+﻿<phone:PhoneApplicationPage 
+    x:Class="HackerNews.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="clr-namespace:HackerNews"
+    xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
+    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="696" 
+    FontFamily="{StaticResource PhoneFontFamilyNormal}"
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    Foreground="{StaticResource PhoneForegroundBrush}"
+    SupportedOrientations="Portrait"  Orientation="Portrait"
+    shell:SystemTray.IsVisible="True"
+    toolkit:TiltEffect.IsTiltEnabled="True">
+
+    <toolkit:TransitionService.NavigationInTransition>
+        <toolkit:NavigationInTransition>
+            <toolkit:NavigationInTransition.Backward>
+                <toolkit:TurnstileTransition Mode="BackwardIn"/>
+            </toolkit:NavigationInTransition.Backward>
+            <toolkit:NavigationInTransition.Forward>
+                <toolkit:TurnstileTransition Mode="ForwardIn"/>
+            </toolkit:NavigationInTransition.Forward>
+        </toolkit:NavigationInTransition>
+    </toolkit:TransitionService.NavigationInTransition>
+    <toolkit:TransitionService.NavigationOutTransition>
+        <toolkit:NavigationOutTransition>
+            <toolkit:NavigationOutTransition.Backward>
+                <toolkit:TurnstileTransition Mode="BackwardOut"/>
+            </toolkit:NavigationOutTransition.Backward>
+            <toolkit:NavigationOutTransition.Forward>
+                <toolkit:TurnstileTransition Mode="ForwardOut"/>
+            </toolkit:NavigationOutTransition.Forward>
+        </toolkit:NavigationOutTransition>
+    </toolkit:TransitionService.NavigationOutTransition>
+
+    <shell:SystemTray.ProgressIndicator>
+        <shell:ProgressIndicator IsIndeterminate="True" IsVisible="True" Text="Fetching news" x:Name="LoadingProgressBar" />
+    </shell:SystemTray.ProgressIndicator>
+
+    <phone:PhoneApplicationPage.ApplicationBar>
+        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
+            <shell:ApplicationBarIconButton IconUri="/Images/appbar.back.rest.png" Text="previous" Click="BackBarIconButton_Click" IsEnabled="False"/>
+            <shell:ApplicationBarIconButton IconUri="/Images/appbar.refresh.rest.png" Text="refresh" Click="RefreshBarIconButton_Click"/>
+            <shell:ApplicationBarIconButton IconUri="/Images/appbar.next.rest.png" Text="next" Click="NextBarIconButton_Click" IsEnabled="False"/>
+            <shell:ApplicationBar.MenuItems>
+                <shell:ApplicationBarMenuItem Text="about" Click="AboutAppBarMenuItem_Click"/>
+            </shell:ApplicationBar.MenuItems>
+        </shell:ApplicationBar>
+    </phone:PhoneApplicationPage.ApplicationBar>
+
+    <phone:PhoneApplicationPage.Resources>
+        <local:UrlConverter x:Key="UrlConverter" />
+
+        <DataTemplate x:Key="DataTemplate">
+            <local:NewsTemplateSelector Content="{Binding}" >
+                
+                <local:NewsTemplateSelector.NewsItemTemplate>
+                    <DataTemplate>
+                        <Border BorderBrush="#FF6600" BorderThickness="10, 0, 0, 0" Margin="{StaticResource PhoneVerticalMargin}">
+                            <Grid Margin="{StaticResource PhoneVerticalMargin}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="390" />
+                                    <ColumnDefinition Width="70" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="{Binding Title}" Style="{StaticResource PhoneTextTitle2Style}" TextWrapping="Wrap" local:ListAnimation.AnimationLevel="1" />
+
+                                <StackPanel Grid.Row="1" Orientation="Horizontal" local:ListAnimation.AnimationLevel="1">
+                                    <TextBlock Text="{Binding Points}" Margin="12, 0, 3, 0" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                    <TextBlock Text="points by" Margin="0, 0, 3, 0" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                    <TextBlock Text="{Binding PostedBy}" Margin="0, 0, 3, 0" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                    <TextBlock Text="|" Margin="0, 0, 3, 0" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                    <TextBlock Text="{Binding PostedAgo}" Margin="0" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                </StackPanel>
+
+                                <TextBlock Grid.Row="2" Text="{Binding Url, Converter={StaticResource UrlConverter}}" TextWrapping="Wrap" Margin="12,-6,12,0" Foreground="#1BA1E2" Style="{StaticResource PhoneTextSubtleStyle}" local:ListAnimation.AnimationLevel="1"/>
+
+                                <Grid Grid.Column="1" Grid.RowSpan="3" MouseLeftButtonUp="CommentIcon_Click" local:ListAnimation.AnimationLevel="1">
+                                    <Grid.Background>
+                                        <ImageBrush ImageSource="Images/chat_white_80.png" AlignmentY="Center" AlignmentX="Center" Stretch="None" />
+                                    </Grid.Background>
+                                    <TextBlock Padding="2, 0, 0, 5" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding CommentCount}" Style="{StaticResource PhoneTextSmallStyle}" FontSize="{StaticResource PhoneFontSizeNormal}" FontFamily="{StaticResource PhoneFontFamilySemiBold}" Foreground="Black" />
+                                </Grid>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </local:NewsTemplateSelector.NewsItemTemplate>
+                
+                <local:NewsTemplateSelector.JobAdTemplate>
+                    <DataTemplate>
+                        <Border BorderBrush="#339933" BorderThickness="10, 0, 0, 0" Margin="{StaticResource PhoneVerticalMargin}">
+                            <StackPanel Margin="{StaticResource PhoneVerticalMargin}" local:ListAnimation.AnimationLevel="1">
+                                <TextBlock Text="{Binding Title}" Style="{StaticResource PhoneTextTitle2Style}" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding PostedAgo}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                <TextBlock Text="{Binding Url, Converter={StaticResource UrlConverter}}" TextWrapping="Wrap" Margin="12,-6,12,0" Foreground="#1BA1E2" Style="{StaticResource PhoneTextSubtleStyle}"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </local:NewsTemplateSelector.JobAdTemplate>
+                
+            </local:NewsTemplateSelector>
+        </DataTemplate>
+    </phone:PhoneApplicationPage.Resources>
+
+    <!--LayoutRoot is the root grid where all page content is placed-->
+    <Grid x:Name="LayoutRoot" Background="Transparent">
+        <controls:Pivot Title="HACKER NEWS" Foreground="#FF6600" x:Name="MainPivot" SelectionChanged="Pivot_SelectionChanged">
+
+            <controls:PivotItem Header="home" x:Name="HomePivotItem">
+                <ListBox x:Name="FrontPageListBox" Margin="0,0,-12,0" ItemTemplate="{StaticResource DataTemplate}" SelectionChanged="NewsList_SelectionChanged" local:ListAnimation.IsPivotAnimated="True" />
+            </controls:PivotItem>
+
+            <controls:PivotItem Header="new" x:Name="NewPivotItem">
+                <ListBox x:Name="NewPageListBox" Margin="0,0,-12,0" ItemTemplate="{StaticResource DataTemplate}" SelectionChanged="NewsList_SelectionChanged" local:ListAnimation.IsPivotAnimated="True" />
+            </controls:PivotItem>
+
+            <!--Pivot item three-->
+            <controls:PivotItem Header="ask" x:Name="AskPivotItem">
+                <ListBox x:Name="AskPageListBox" Margin="0,0,-12,0" ItemTemplate="{StaticResource DataTemplate}" SelectionChanged="NewsList_SelectionChanged" local:ListAnimation.IsPivotAnimated="True" />
+            </controls:PivotItem>
+        </controls:Pivot>
+    </Grid>
+
+
+
+</phone:PhoneApplicationPage>
